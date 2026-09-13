@@ -1,0 +1,19 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.ipynb_checkpoints/
+.pytest_cache/
+
+# dataset and experiment outputs
+/dataset/
+/models/
+nureasoning_vla_workspace*/
+nureasoning_vla_qa_workspace*/
+nureasoning_planning_benchmark_output*/
+reasoning_workspace*/
+reasoning_eval*/
+reasoning_viz/
+vqa_output*/
+submission*.json
+challenge_submission.json
+*.partial.jsonl

@@ -1,0 +1,34 @@
+# Core dependencies of the nuReasoning devkit.
+# For a fully pinned environment use `conda env create -f environment.yml`.
+
+--extra-index-url https://download.pytorch.org/whl/cu128
+
+numpy
+scipy
+shapely
+matplotlib
+imageio-ffmpeg
+pillow
+tqdm
+pyyaml
+
+# dataset download
+huggingface_hub>=1.0
+
+# nuVLA and reasoning training / inference
+torch
+torchvision
+transformers>=5.4.0
+accelerate>=1.13.0
+peft>=0.18.1
+safetensors
+
+# reasoning evaluation: client for any OpenAI-compatible server (e.g. vLLM)
+openai
+
+# ROUGE-L for free-text answers; scoring falls back to token F1 without it
+rouge-score
+
+# optional: Gemini-based VQA question rephrasing
+#   python -m nureasoning.vqa.generate --gemini-rephrase
+google-genai

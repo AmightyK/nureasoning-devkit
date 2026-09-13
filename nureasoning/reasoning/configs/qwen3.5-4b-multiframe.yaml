@@ -1,0 +1,79 @@
+# nuReasoning reasoning-only LoRA SFT — Qwen3.5-4B, multi-view multi-frame.
+#
+# One training example = 8 cameras x 2 frames = 16 images. The two frames per
+# camera are the current one and the one 1 second earlier; the released clips
+# are annotated at 1 Hz, so the two most recent frames of each camera sequence
+# already span that window.
+#
+# Build the matching data with:
+#   python -m nureasoning.reasoning.build_sft --vqa-dir ./vqa_output \
+#     -o ./reasoning_workspace/sft_train_multiframe.jsonl \
+#     --keyframe-only --num-forward-frames 2 --max-images 16 --history-first \
+#     --max-spatial-per-frame 10
+#
+# Existing relative paths are looked up against the working directory first and
+# this config's directory second; output_dir is always relative to the working
+# directory, and model_path is left alone when it is a Hugging Face repo id.
+
+# Base checkpoint: a local directory or a Hugging Face repo id.
+model_path: Qwen/Qwen3.5-4B
+# Optional: force a transformers class. By default it is read from the
+# checkpoint's `architectures` field, which also covers Qwen3-VL and friends.
+# model_class: Qwen3_5ForConditionalGeneration
+
+train_jsonl: ./reasoning_workspace/sft_train_multiframe.jsonl
+
+output_dir: ./reasoning_workspace/lora_qwen3.5-4b-multiframe
+# Rank 0 creates <output_dir>_YYYY-MM-DD_HHMMSS and broadcasts it (avoids a
+# torchrun race that used to split adapter files across two folders).
+output_append_run_date: true
+
+# Images per example. Must match how the JSONL was built.
+max_images: 16
+
+# Total pixels per image for the Qwen image processor; 200704 = 448 x 448.
+# Applied to all 16 frames. Mixed resolution (history_max_pixels together with
+# num_current_images, which needs the time-major order from --history-first) is
+# left off so that training and evaluation see identical inputs.
+max_pixels: 200704
+# history_max_pixels: 50176
+# num_current_images: 8
+
+lora_r: 32
+lora_alpha: 64
+lora_dropout: 0.05
+target_modules:
+  - q_proj
+  - k_proj
+  - v_proj
+  - o_proj
+  - gate_proj
+  - up_proj
+  - down_proj
+
+# Effective batch = num_gpus * per_device_train_batch_size * grad_accum.
+# The reference run used 8 GPUs: 8 * 4 * 2 = 64. Keep the product at 64 when
+# training on a different number of GPUs.
+learning_rate: 5.0e-5
+num_train_epochs: 1
+max_steps: null
+warmup_ratio: 0.03
+weight_decay: 0.01
+lr_scheduler_type: cosine
+per_device_train_batch_size: 4
+gradient_accumulation_steps: 2
+logging_steps: 5
+save_steps: 200
+save_total_limit: 3
+
+bf16: true
+fp16: false
+gradient_checkpointing: true
+
+# Room for roughly twice the vision tokens of a single-frame setup.
+max_seq_length: 28672
+
+# Cap the dataset for a quick run; null uses everything.
+max_samples: null
+
+seed: 42
