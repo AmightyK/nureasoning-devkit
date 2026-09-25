@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools==80.10.2", "wheel==0.46.3"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nureasoning-devkit"
+version = "0.1.0"
+requires-python = ">=3.10,<3.11"
+# Keep package metadata and requirements owned by the existing setup.py.
+dynamic = ["description", "readme", "authors", "classifiers", "urls", "dependencies"]
+
+[tool.uv]
+environments = ["sys_platform == 'linux' and platform_machine == 'x86_64'"]
+# Match direct dependencies to the reference environment.yml. uv.lock pins
+# the transitive dependencies; vLLM must use a separate environment.
+constraint-dependencies = [
+    "numpy==2.2.6",
+    "scipy==1.15.3",
+    "shapely==2.1.2",
+    "matplotlib==3.10.8",
+    "imageio-ffmpeg==0.6.0",
+    "pillow==12.1.1",
+    "tqdm==4.67.3",
+    "pyyaml==6.0.3",
+    "huggingface-hub==1.8.0",
+    "torch==2.10.0+cu128",
+    "torchvision==0.25.0+cu128",
+    "transformers==5.4.0",
+    "accelerate==1.13.0",
+    "peft==0.18.1",
+    "safetensors==0.7.0",
+    "openai==2.24.0",
+    "rouge-score==0.1.2",
+    "google-genai==1.72.0",
+]
+
+[tool.uv.sources]
+torch = { index = "pytorch-cu128" }
+torchvision = { index = "pytorch-cu128" }
+
+[[tool.uv.index]]
+name = "pytorch-cu128"
+url = "https://download.pytorch.org/whl/cu128"
+explicit = true

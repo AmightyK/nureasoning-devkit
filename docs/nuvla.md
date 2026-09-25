@@ -83,6 +83,8 @@ Resume with `--resume_from <epoch_dir>`. Eval and challenge inference load `trai
 | --- | --- | --- |
 | `--data_root` | `./dataset/data/train` | Training clips |
 | `--test_data_root` | `./dataset/data/validation` | Held-out clips for epoch eval (omit / empty skips eval) |
+| `--train_fraction` | `1.0` | Fraction of discovered training clips, rounded up; `0.05` selects 5%. Validation is unchanged |
+| `--data_seed` | `42` | Seed for training-clip selection, reproducible for an unchanged clip tree |
 | `--vlm_model_path` | `Qwen/Qwen3-VL-2B-Instruct` | Hub id or local snapshot |
 | `--output_dir` | `./nureasoning_vla_workspace_spatial_driving_counterfactual` | Workspace / checkpoints |
 | `--batch_size` | `2` | Per-GPU micro-batch |
@@ -93,6 +95,15 @@ Resume with `--resume_from <epoch_dir>`. Eval and challenge inference load `trai
 | `--eval_interval` | `1` | Run trajectory eval every N epochs |
 | `--save_interval` | `1` | Save a checkpoint every N epochs |
 | `--resume_from` | unset | Path to an `epoch_*` or `final` directory |
+
+For a short trial, add `--train_fraction 0.05 --data_seed 42 --epochs 1` and
+use a separate `--output_dir`. Selection happens before frame indexing and
+retains every eligible frame in each selected clip. This is 5% of clips, not
+necessarily 5% of frames. The fraction and seed are saved in
+`training_config.json`. The training log reports selected and total clip counts.
+This does not create a validation split or reduce per-batch GPU memory.
+Use labeled training data, not the challenge test split. Pass
+`--test_data_root ""` to skip validation when no held-out labeled data is ready.
 
 ### Optimizers and loss
 

@@ -1,0 +1,70 @@
+schema_version: 1
+experiment_name: levjepa_intent_dit_cpu_smoke
+data:
+  train_root: ./dataset/data/train
+  val_root: ./dataset/data/validation
+  cameras: [front]
+  camera_vocab: [front, front_left, front_right, left, right, back, back_left, back_right]
+  command_vocab: [UNKNOWN, LANE_FOLLOW, STRAIGHT, TURN_LEFT, TURN_RIGHT, LEFT_LANE_CHANGE, RIGHT_LANE_CHANGE, STOP]
+  image_size: 224
+  num_video_frames: 16
+  video_window_s: 2.0
+  frame_tolerance_s: 0.075
+  history_steps: 6
+  history_dt_s: 0.5
+  future_steps: 10
+  future_dt_s: 0.5
+  train_clip_fraction: 1.0
+  clip_seed: 42
+  require_complete_inputs: true
+backbone:
+  model_id: galilai-group/LeVJEPA-VideoMix-Large
+  revision: null
+  local_path: null
+  local_files_only: true
+  trust_remote_code: false
+  allow_audited_local_code: false
+  code_revision: null
+  expected_feature_dim: 32
+  expected_has_cls_token: true
+  camera_chunk_size: 1
+  frozen: true
+  use_stub: true
+  stub_patch_tokens: 17
+model:
+  context_dim: 32
+  scene_tokens: 4
+  intent_layers: 1
+  intent_heads: 4
+  intent_dropout: 0.0
+  trajectory_layers: 2
+  trajectory_hidden_dim: 64
+  action_layers: 2
+  action_heads: 4
+  action_dropout: 0.0
+  action_mlp_ratio: 2.0
+  action_interleave_self_attention: true
+  num_inference_steps: 2
+  trajectory_norm_scale: [50.0, 20.0, 3.141592653589793]
+loss:
+  reconstruction_position: 1.0
+  reconstruction_heading: 1.0
+  reconstruction_motion: 0.25
+  feature: 1.0
+  token_cosine: 1.0
+  info_nce: 0.1
+  info_nce_temperature: 0.1
+  lambda_jepa: 1.0
+training:
+  batch_size: 2
+  val_batch_size: 2
+  num_workers: 0
+  epochs: 1
+  learning_rate: 0.001
+  weight_decay: 0.0001
+  gradient_accumulation_steps: 1
+  max_grad_norm: 1.0
+  amp: false
+  seed: 42
+  log_every: 1
+  output_dir: ./outputs/jepa_planning_smoke

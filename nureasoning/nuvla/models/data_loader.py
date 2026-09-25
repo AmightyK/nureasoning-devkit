@@ -19,6 +19,7 @@ import logging
 import math
 import os
 import pickle
+import random
 import re
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Sequence, Tuple
@@ -121,6 +122,8 @@ class VLADataConfig:
     reasoning_mode: str = "structured"  # "structured" | "vqa"
     vqa_root: Optional[str] = None
     qa_seed: int = 42
+    clip_fraction: float = 1.0
+    clip_seed: int = 42
 
 
 class NuReasoningVLADataset(Dataset):
@@ -138,6 +141,8 @@ class NuReasoningVLADataset(Dataset):
     """
 
     def __init__(self, config: VLADataConfig, split: str = "train"):
+        if not 0.0 < config.clip_fraction <= 1.0:
+            raise ValueError("clip_fraction must be in (0, 1]")
         self.config = config
         self.split = split
         self.samples: List[Dict[str, Any]] = []
@@ -179,6 +184,15 @@ class NuReasoningVLADataset(Dataset):
         from nureasoning.common.clips import discover_clips
 
         clip_dirs = discover_clips(data_root)
+        total_clips = len(clip_dirs)
+        if clip_dirs and self.config.clip_fraction < 1.0:
+            count = math.ceil(total_clips * self.config.clip_fraction)
+            clip_dirs = sorted(random.Random(self.config.clip_seed).sample(clip_dirs, count))
+        logger.info(
+            "[%s] Selected %d/%d clips (fraction=%g, seed=%d)",
+            self.split, len(clip_dirs), total_clips,
+            self.config.clip_fraction, self.config.clip_seed,
+        )
 
         for clip_dir in clip_dirs:
             try:

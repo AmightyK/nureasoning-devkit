@@ -17,6 +17,7 @@ setuptools.setup(
     python_requires=">=3.10",
     packages=setuptools.find_packages(include=["nureasoning", "nureasoning.*"]),
     include_package_data=True,
+    package_data={"nureasoning.jepa_planning": ["configs/*.yaml"]},
     install_requires=[
         line.strip()
         for line in open(os.path.join(os.path.dirname(__file__), "requirements.txt"))

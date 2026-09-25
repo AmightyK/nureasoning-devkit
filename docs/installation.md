@@ -29,6 +29,27 @@ pip install -r requirements.txt
 pip install -e .
 ```
 
+## Install with uv (Linux x86_64, NVIDIA GPU)
+
+From the repository root:
+
+```bash
+uv sync --locked
+uv run python -c "import torch, nureasoning; print(nureasoning.__version__, torch.__version__, torch.cuda.is_available())"
+uv run python -m nureasoning.reasoning.modules.selftest_metrics
+```
+
+uv uses Python 3.10 and creates `.venv/` without changing system Python.
+`pyproject.toml` reuses `setup.py` metadata and `requirements.txt`, constrains
+direct dependencies to the reference `environment.yml` versions, and selects
+the CUDA 12.8 PyTorch index explicitly. `uv.lock` pins resolved dependencies.
+After changing dependencies, run `uv lock` before `uv sync --locked`.
+
+Prefix the Python commands in these docs with `uv run`, for example
+`uv run python -m nureasoning.planning.benchmark --help`. This installs software
+only, not model weights or datasets. nuVLA inference still needs a trained
+checkpoint. Keep vLLM in a separate environment as described below.
+
 ## Reasoning training / testing
 
 Reasoning **training** (`python -m nureasoning.reasoning.train`) uses the `nureasoning` environment above.

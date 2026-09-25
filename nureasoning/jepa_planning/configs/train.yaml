@@ -1,0 +1,71 @@
+# Starting configuration only. Hyperparameters are not validated optima.
+schema_version: 1
+experiment_name: levjepa_intent_dit
+data:
+  train_root: ./dataset/data/train
+  val_root: ./dataset/data/validation
+  cameras: [front, front_left, front_right, left, right, back, back_left, back_right]
+  camera_vocab: [front, front_left, front_right, left, right, back, back_left, back_right]
+  command_vocab: [UNKNOWN, LANE_FOLLOW, STRAIGHT, TURN_LEFT, TURN_RIGHT, LEFT_LANE_CHANGE, RIGHT_LANE_CHANGE, STOP]
+  image_size: 224
+  num_video_frames: 16
+  video_window_s: 2.0
+  frame_tolerance_s: 0.075
+  history_steps: 6
+  history_dt_s: 0.5
+  future_steps: 10
+  future_dt_s: 0.5
+  train_clip_fraction: 1.0
+  clip_seed: 42
+  require_complete_inputs: true
+backbone:
+  model_id: galilai-group/LeVJEPA-VideoMix-Large
+  revision: null  # set to an audited immutable commit before M3
+  local_path: null  # preferred: path to an audited local snapshot
+  local_files_only: true
+  trust_remote_code: false
+  allow_audited_local_code: false  # set true only after reviewing the local snapshot
+  code_revision: null  # record the audited custom-code commit/hash before M3
+  expected_feature_dim: 1024
+  expected_has_cls_token: true
+  camera_chunk_size: 1
+  frozen: true
+  use_stub: false
+  stub_patch_tokens: 17
+model:
+  context_dim: 512
+  scene_tokens: 64
+  intent_layers: 4
+  intent_heads: 8
+  intent_dropout: 0.1
+  trajectory_layers: 3
+  trajectory_hidden_dim: 512
+  action_layers: 12
+  action_heads: 8
+  action_dropout: 0.1
+  action_mlp_ratio: 4.0
+  action_interleave_self_attention: true
+  num_inference_steps: 10
+  trajectory_norm_scale: [50.0, 20.0, 3.141592653589793]
+loss:
+  reconstruction_position: 1.0
+  reconstruction_heading: 1.0
+  reconstruction_motion: 0.25
+  feature: 1.0
+  token_cosine: 1.0
+  info_nce: 0.1
+  info_nce_temperature: 0.1
+  lambda_jepa: 1.0
+training:
+  batch_size: 2
+  val_batch_size: 2
+  num_workers: 4
+  epochs: 10
+  learning_rate: 0.0001
+  weight_decay: 0.0001
+  gradient_accumulation_steps: 1
+  max_grad_norm: 1.0
+  amp: true
+  seed: 42
+  log_every: 10
+  output_dir: ./outputs/jepa_planning

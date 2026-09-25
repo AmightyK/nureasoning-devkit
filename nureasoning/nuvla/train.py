@@ -18,7 +18,7 @@ Architecture:
                            │                   │
                            │  Action Loss      │
                            │  (trajectory MSE) │
-                           └───────────────────┘
+                           └───────────────────┘z
 
 Reasoning modes (VLM text target; the action expert always trains on trajectories):
 
@@ -264,6 +264,8 @@ class VLATrainer:
     def _build_data(self):
         args = self.args
         data_config = self._vla_data_config(args.data_root)
+        data_config.clip_fraction = args.train_fraction
+        data_config.clip_seed = args.data_seed
 
         dataset = NuReasoningVLADataset(data_config, split="train")
 
@@ -892,6 +894,14 @@ def parse_args():
     parser.add_argument("--data_root", type=str, default="./dataset/data/train")
     parser.add_argument("--test_data_root", type=str, default="./dataset/data/validation")
     parser.add_argument(
+        "--train_fraction", type=float, default=1.0,
+        help="Fraction of discovered training clips to use, in (0, 1]; 0.05 uses 5%%. Validation is unchanged.",
+    )
+    parser.add_argument(
+        "--data_seed", type=int, default=42,
+        help="Seed for selecting training clips; independent of model training randomness.",
+    )
+    parser.add_argument(
         "--vlm_model_path",
         type=str,
         default="Qwen/Qwen3-VL-2B-Instruct",
@@ -1003,6 +1013,8 @@ def parse_args():
     parser.add_argument("--resume_from", type=str, default=None)
 
     args = parser.parse_args()
+    if not 0.0 < args.train_fraction <= 1.0:
+        parser.error("--train_fraction must be in (0, 1]")
     resolve_reasoning_training_args(args, parser)
     return args
 
