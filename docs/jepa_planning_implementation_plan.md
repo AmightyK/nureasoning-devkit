@@ -3,6 +3,8 @@
 Status: M0--M2 implemented and synthetic-CPU tested. M3--M5 are prepared but unrun.
 Date: 2026-09-25.
 Architecture reference: [jepa_planning.md](jepa_planning.md).
+Execution handoff for the remaining real-data/GPU work:
+[Vietnamese M3--M5 runbook](jepa_planning_next_steps_vi.md).
 
 ## 1. Scope and Non-Negotiables
 
